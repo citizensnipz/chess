@@ -26,11 +26,20 @@ class Board
 	end
 	def show_board
 		i = 0
+		n = 1
 		@grid.each_index do |pos|
 			i = i>7 ? 0 : i
-			if !@grid[pos].is_a? Array
+			if (pos == 0)||(pos%8 == 0)
+				print " #{n} "
+				if !@grid[pos].is_a? Array
+					print "| #{@grid[pos]} |"
+				else
+					print "|    |"
+				end
+				n += 1
+			elsif !@grid[pos].is_a? Array
 				print "| #{@grid[pos]} |"
-			else 
+			else
 				print "|    |"
 			end
 			i += 1
@@ -38,6 +47,7 @@ class Board
 				puts "\n\n"
 			end
 		end
+		print "      a    b     c     d     e     f     g     h  "
 	end
 
 	def update(former, current)
