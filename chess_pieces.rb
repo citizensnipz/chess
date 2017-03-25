@@ -1,3 +1,5 @@
+module Mod
+
 class Piece
 	attr_accessor :pos, :icon
 	def initialize

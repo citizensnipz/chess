@@ -1,6 +1,7 @@
 require './chess_pieces'
 
 class Player
+	attr_reader :name
 	def initialize(input)
 		@name = input
 		@pieces_list = []
@@ -27,9 +28,9 @@ class Player
 		bishop1,bishop2 = Bishop.new(@name),Bishop.new(@name)
 		knight1,knight2 = Knight.new(@name),Knight.new(@name)
 		rook1,rook2 = Rook.new(@name),Rook.new(@name)
-		pawn1,pawn2,pawn3,pawn4,pawn5,pawn6,pawn7,pawn8 = Pawn.new(@name),Pawn.new(@name),Pawn.new(@name),Pawn.new(@name),Pawn.new(@name),Pawn.new(@name),Pawn.new(@name),Pawn.new(@name)
+		pawn1,pawn2,pawn3,pawn4,pawn5,pawn6,pawn7,pawn8 = Pawn.new(@name),Pawn.new(@name),Pawn.new(@name),Pawn.new(@name),Pawn.new(@name	),Pawn.new(@name),Pawn.new(@name),Pawn.new(@name)
 		if @name == "player1"
-			@pieces_list = [pawn1,pawn2,pawn3,pawn4,pawn5,pawn6,pawn7,pawn8,rook1,knight1,bishop1,king,queen,bishop2,knight2,rook2]
+			@pieces_list = [rook2,knight2,bishop2,queen,king,bishop1,knight1,rook1,pawn8,pawn7,pawn6,pawn5,pawn4,pawn3,pawn2,pawn1]
 		else
 			@pieces_list = [pawn1,pawn2,pawn3,pawn4,pawn5,pawn6,pawn7,pawn8,rook1,knight1,bishop1,queen,king,bishop2,knight2,rook2]
 		end
