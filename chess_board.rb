@@ -2,12 +2,13 @@ require './chess_pieces'
 require './chess_players'
 
 class Board
+	attr_accessor :root
 	def initialize
 		@root = Square.new
 		@root.create_grid
 	end
-	
 	def ready_board(player)
+	#runs the methods to setup the board for both players at once
 		if player.name == "player1"
 			@root.setup(player.name, player.pieces_list)
 		else
@@ -41,19 +42,6 @@ class Board
 		print "     a     b     c     d     e     f     g     h  "
 		puts "\n\n"
 	end
-
-	def update(current_pos, new_pos)
-		@root.grid.each do |square|
-			if square.position == current_pos
-				@piece = square.piece
-				square.piece = nil
-				@piece.pos = new_pos
-			elsif square.position == new_pos
-				square.piece = @piece
-			end
-		end
-	end
-
 end
 
 class Square
@@ -62,8 +50,8 @@ class Square
 		@position = []
 		@piece = nil
 	end
-	
 	def create_grid
+	#generates a grid of Square objects with coordinates
 		arr1,arr2 = [8,7,6,5,4,3,2,1],[1,2,3,4,5,6,7,8]
 		@coords = arr1.product(arr2)
 		@grid = []
@@ -75,6 +63,7 @@ class Square
 	end
 	
 	def setup(player, pieces)
+	#puts the pieces on the board at the start of the game
 		if player == "player1"
 			@grid.each_index do |ind|
 				if ind < 16
@@ -92,6 +81,25 @@ class Square
 				end
 			end
 		end
+	end
+	
+	def find(position)
+		@grid.each do |square|
+			if square.position == position
+				return square
+			end
+		end
+		return nil
+	end
+	
+	def player_squares(pieces)
+		square_list = []
+		@grid.each do |square|
+			if pieces.include? square.piece
+				square_list << square
+			end
+		end
+		return square_list
 	end
 		
 end

@@ -18,11 +18,9 @@ class Player
 	#	@grid.index[destination] = piece_destination
 	#end
 
-	def get_name
-		@name
-	end
-
 	def ready_pieces
+	#initializes all the piece objects at the beginning of the game
+	#makes a list '@pieces_list' containing all of the pieces for a given player
 		king = King.new(@name)
 		queen = Queen.new(@name)
 		bishop1,bishop2 = Bishop.new(@name),Bishop.new(@name)

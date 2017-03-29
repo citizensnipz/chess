@@ -24,8 +24,12 @@ class Chess
 
 	def play
 		@board.show_board
-		@board.update([8,1],[6,1])
+		@player2.pieces_list[8].move([6,4], @board.root)
 		@board.show_board
+		@player2.pieces_list[8].next_move_list(@player2.pieces_list,@board.root).each do |thing|
+			puts thing
+			puts "\n\n"
+		end
 	end
 end
 
