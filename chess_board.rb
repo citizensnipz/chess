@@ -84,6 +84,7 @@ class Square
 	end
 	
 	def find(position)
+		#returns a square with a given coordinate
 		@grid.each do |square|
 			if square.position == position
 				return square
@@ -93,6 +94,7 @@ class Square
 	end
 	
 	def player_squares(pieces)
+		#returns an array of Squares occupied by the given player's pieces
 		square_list = []
 		@grid.each do |square|
 			if pieces.include? square.piece
@@ -100,6 +102,17 @@ class Square
 			end
 		end
 		return square_list
+	end
+	
+	def empty_squares
+		#returns an array of coordinates that are unoccupied by any player
+		empty_list = []
+		@grid.each do |square|
+			if square.piece.nil?
+				empty_list << square.position
+			end
+		end
+		return empty_list
 	end
 		
 end
