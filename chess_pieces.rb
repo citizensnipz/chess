@@ -1,4 +1,5 @@
 require './chess_board'
+require './chess_players'
 
 class Piece
 	attr_accessor :pos, :icon, :move_list
@@ -11,7 +12,10 @@ class Piece
 		root.grid.each do |square|
 			if square.position == self.pos
 				square.piece = nil
-			elsif square.position == new_pos
+			end
+		end
+		root.grid.each do |square|
+			if square.position == new_pos
 				square.piece = self
 			end
 		end
@@ -20,7 +24,7 @@ class Piece
 	
 	def move_list_cleanup(list, pieces, root, check = false)
 		list.delete_if { |move|
-			((move[0]>8)||(move[1]<1))||((move[1]>8)||move[1]<1)
+			((move[0]>8)||(move[0]<1))||((move[1]>8)||move[1]<1)
 		}
 		#removes moves containing player's own pieces, unless check is true
 		unless check
@@ -278,10 +282,11 @@ class Pawn < Piece
 		else
 			move_list = (y-1)>0 ? [y-1,x] : []
 		end
+		m_arr = [move_list]
 		#finds if next square is occupied
 		next_move = root.find(move_list)
 		if next_move.piece.nil?
-			return move_list
+			return m_arr
 		else
 			move_list = []
 		end

@@ -1,4 +1,5 @@
 require './chess_pieces'
+require './chess_board'
 
 class Player
 	attr_reader :name
@@ -12,12 +13,27 @@ class Player
 		@pieces_list
 	end
 	def choose
-		puts "Choose a square occupied by your selected piece"
-		position = gets.chomp
-		puts "Select the destination for your piece"
-		destination = gets.chomp
-		piece = @root.find_piece(position)
-		piece.move(destination, @root)
+		begin
+			puts "Choose a square occupied by your selected piece (i.e. 7,1 or 5,6)"
+			position = gets.chomp
+			pos_arr = Array([position[0].to_i,position[2].to_i])
+			piece = @root.find(pos_arr).piece
+			if piece.nil?
+				raise InputError.new("That is an empty square")
+			elsif !self.pieces_list.include? piece
+				raise InputError.new("That piece belongs to your enemy")
+			end
+			puts "Select the destination for your piece"
+			destination = gets.chomp
+			dest_arr = Array([destination[0].to_i,destination[2].to_i])
+			if !piece.next_move_list(@root).include? dest_arr
+				raise InputError.new("That piece cannot move there")
+			end
+		rescue
+			puts "Please try a different location"
+			retry
+		end
+		piece.move(dest_arr, @root)
 	end
 
 	def ready_pieces
@@ -45,5 +61,10 @@ class Player
 			end
 		end
 	end
+end
 
-end 
+class InputError < StandardError
+	def initialize(message)
+		puts message
+	end
+end

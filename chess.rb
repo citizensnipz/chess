@@ -15,6 +15,7 @@ class Chess
 	end
 
 	def has_check?(player, pieces, root)
+		#check is used when king's current position is under threat
 		queue = []
 		pieces.each do |piece|
 			if !piece.is_a? Pawn
@@ -33,6 +34,7 @@ class Chess
 	end
 
 	def has_checkmate?(player, pieces, root)
+		#checkmate is used when king's next moves are all under threat
 		queue = []
 		check = true
 		pieces.each do |piece|
@@ -42,41 +44,53 @@ class Chess
 				queue = queue + piece.attack_squares
 			end
 		end
-		if queue.include? [4,3]
-			puts "it is in the queue"
-		else
-			puts "it is not in the queue"
-		end
-		value = ""
+		value = false
 		king = player.name == "player1" ? player.pieces_list[4] : player.pieces_list[12]
 		king_move_list = king.next_move_list(root)
-		king_move_list.each do |king_move|
-			puts "here's the king's moves: #{king_move}"
-			if queue.include? king_move
-				value = true
-			else
-				value = false
+		if king_move_list.empty?
+			value = true
+		else
+			king_move_list.each do |king_move|
+				if queue.include? king_move
+					value = true
+				else
+					value = false
+				end
 			end
 		end
 		return value
 	end
 
 	def play
-		@board.show_board
-		@player1.pieces_list[4].move([5,4], @board.root)
-		@player1.pieces_list[15].move([4,4], @board.root)
-		@player1.pieces_list[14].move([4,5], @board.root)
-		@player1.pieces_list[13].move([5,5], @board.root)
-		@player1.pieces_list[12].move([6,5], @board.root)
-		@player1.pieces_list[11].move([6,4], @board.root)
-		@player1.pieces_list[10].move([6,3], @board.root)
-		@player1.pieces_list[9].move([5,3], @board.root)
-		@player2.pieces_list[0].move([4,3], @board.root)
-		@player2.pieces_list[13].move([3,2], @board.root)
-		@board.show_board
-		puts @player1.pieces_list[4].next_move_list(@board.root)
-		puts self.has_check?(@player1, @player2.pieces_list, @board.root)
-		puts self.has_checkmate?(@player1, @player2.pieces_list, @board.root)
+		checkmate = false
+		until checkmate do
+			@board.show_board
+			if self.has_check?(@player1, @player2.pieces_list, @board.root)
+				puts "Player 1 is in check!"
+				@player1.choose
+				if self.has_checkmate?(@player1, @player2.pieces_list, @board.root)
+					puts "Checkmate! Player 2 wins!"
+					checkmate = true
+					return checkmate
+				end
+			else
+				puts "It is player 1's turn..."
+				@player1.choose
+			end
+			@board.show_board
+			if self.has_check?(@player2, @player1.pieces_list, @board.root)
+				puts "Player 2 is in check!"
+				@player2.choose
+				if self.has_checkmate?(@player2, @player1.pieces_list, @board.root)
+					puts "Checkmate! Player 1 wins!"
+					checkmate = true
+					return checkmate
+				end
+			else
+				puts "It is player 2's turn..."
+				@player2.choose
+			end
+		end
 	end
 end
 
