@@ -12,28 +12,44 @@ class Player
 	def pieces_list
 		@pieces_list
 	end
-	def choose
+	def choose(virtual = false)
+		convert_arr = ["a","b","c","d","e","f","g","h"]
 		begin
-			puts "Choose a square occupied by your selected piece (i.e. 7,1 or 5,6)"
+			puts "Choose a square occupied by your selected piece (i.e. 7,b or 5,g)"
 			position = gets.chomp
-			pos_arr = Array([position[0].to_i,position[2].to_i])
+			pos_ind = convert_arr.index(position[2])
+			row,column = position[0].to_i,pos_ind+1
+			pos_arr = Array([row,column])
 			piece = @root.find(pos_arr).piece
 			if piece.nil?
-				raise InputError.new("That is an empty square")
+				raise InputError.new("That is an empty square\n\n")
 			elsif !self.pieces_list.include? piece
-				raise InputError.new("That piece belongs to your enemy")
+				raise InputError.new("That piece belongs to your enemy\n\n")
 			end
 			puts "Select the destination for your piece"
 			destination = gets.chomp
-			dest_arr = Array([destination[0].to_i,destination[2].to_i])
+			dest_ind = convert_arr.index(destination[2])
+			row,column = destination[0].to_i,dest_ind+1
+			dest_arr = Array([row,column])
+			#checks if the piece can move there
 			if !piece.next_move_list(@root).include? dest_arr
-				raise InputError.new("That piece cannot move there")
+				raise InputError.new("That piece cannot move there\n\n")
 			end
 		rescue
-			puts "Please try a different location"
+			puts "Please try a different location\n\n"
 			retry
 		end
-		piece.move(dest_arr, @root)
+		results = [piece, dest_arr]
+		return results
+		#piece.move(dest_arr, @root)
+	end
+	
+	def erase_piece(piece)
+		#removes an enemy piece from their pieces list
+		#this allows future calculations to not consider their possible moves
+		player = piece.player
+		index = player.pieces_list.index(piece)
+		player.pieces_list[index] = []
 	end
 
 	def ready_pieces

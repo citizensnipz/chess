@@ -2,25 +2,49 @@ require './chess_board'
 require './chess_players'
 
 class Piece
-	attr_accessor :pos, :icon, :move_list
-	def initialize
+	attr_accessor :pos, :icon
+	attr_reader :player
+	def initialize(player)
 		@pos = []
 		@icon = ""
+		@player = player
+		@removed_piece = nil
+		@removed_piece_index = 0
 	end
 
-	def move(new_pos, root)
-		root.grid.each do |square|
-			if square.position == self.pos
-				square.piece = nil
+	def move(new_pos, root, virtual = false)
+		if virtual
+			#describes the action if the move is only simulated
+			#retains the removed piece in an instance variable, used to undo the move
+			root.find(self.pos).piece = nil
+			@removed_piece = root.find(new_pos).piece
+			unless @removed_piece.nil?
+				@removed_piece_index = @removed_piece.player.pieces_list.index(root.find(new_pos).piece)
+				@removed_piece.player.erase_piece(root.find(new_pos).piece)
+			end
+			root.find(new_pos).piece = self
+			self.pos = new_pos
+		else
+			root.find(self.pos).piece = nil
+			if root.find(new_pos).piece.nil?
+				root.find(new_pos).piece = self
+				self.pos = new_pos
+			else
+				enemy_piece = root.find(new_pos).piece
+				enemy_piece.player.erase_piece(enemy_piece)
+				root.find(new_pos).piece = self
+				self.pos = new_pos
 			end
 		end
-		root.grid.each do |square|
-			if square.position == new_pos
-				square.piece = self
-			end
-		end
-		self.pos = new_pos
 	end
+	
+	def unmove(old_pos, root)
+		@removed_piece.player.pieces_list[@removed_piece_index] = @removed_piece unless @removed_piece.nil?
+		root.find(old_pos).piece = self
+		root.find(self.pos).piece = @removed_piece
+		self.pos = old_pos
+	end
+	
 	
 	def move_list_cleanup(list, pieces, root, check = false)
 		list.delete_if { |move|
@@ -273,35 +297,41 @@ class Pawn < Piece
 		@icon = (player.name == "player1") ? "\u2659" : "\u265F"
 		@player = player
 	end
-
-	def next_move_list(root)
-		y,x = self.pos[0],self.pos[1]
-		#shows moves up or down depending on player's side
-		if @player.name == "player2"
-			move_list = (y+1)<9 ? [y+1,x] : []
+	
+	def next_move_list(root, check = false)
+		y,x = self.pos[0], self.pos[1]
+		move_list = []
+		if @player.name == "player1"
+			first_moves = y == 7 ? [[6,x],[5,x]] : [[y-1,x]]
+			attack_move_left = (x-1)>0 ? [y-1,x-1] : []
+			attack_move_right = (x+1)<9 ? [y-1,x+1] : []
 		else
-			move_list = (y-1)>0 ? [y-1,x] : []
+			first_moves = y == 2 ? [[3,x],[4,x]] : [[y+1,x]]
+			attack_move_left = (x-1)>0 ? [y+1,x-1] : []
+			attack_move_right = (x+1)<9 ? [y+1,x+1] : []
 		end
-		m_arr = [move_list]
-		#finds if next square is occupied
-		next_move = root.find(move_list)
-		if next_move.piece.nil?
-			return m_arr
+		forward_square1 = root.find(first_moves[0])
+		forward_square2 = first_moves.length > 1 ? root.find(first_moves[1]) : nil
+		forward_piece1 = forward_square1.piece unless forward_square1.nil?
+		forward_piece2 = forward_square2.piece unless forward_square2.nil?
+		left_square = root.find(attack_move_left)
+		right_square = root.find(attack_move_right)
+		left_piece = left_square.piece unless left_square.nil?
+		right_piece = right_square.piece unless right_square.nil?
+		move_list = move_list + [attack_move_left] unless (left_piece.nil?)
+		move_list = move_list + [attack_move_right] unless (right_piece.nil?)
+		move_list = move_list + [first_moves[0]] unless !forward_piece1.nil?
+		move_list = move_list + [first_moves[1]] unless !forward_piece2.nil?
+		move_list.delete_if { |move|
+			move.nil?
+		}
+		#cleanup the list by removing
+		if !move_list.empty?
+			clean_move_list = self.move_list_cleanup(move_list, @player.pieces_list, root, check)
+			return clean_move_list
 		else
-			move_list = []
+			return move_list	
 		end
 	end
 	
-	def attack_squares
-		y,x = self.pos[0],self.pos[1]
-		attack_squares = []
-		if x == 8
-			attack_squares << [y+1,x-1]
-		elsif x == 1
-			attack_squares << [y+1,x+1]
-		else
-			attack_squares << [y+1,x+1]
-			attack_squares << [y+1,x-1]
-		end
-	end
 end
